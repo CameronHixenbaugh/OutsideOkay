@@ -2,19 +2,40 @@
 
 Outside Okay is a website that was created at the height of the COVID-19 pandemic to help inform community residents about the risk of exposure to COVID-19. The site also informs users of techniques to prevent the spread of COVID-19 such as, washing your hands, wearing a mask, etc. A user is prompted to input their zipcode and based on the COVID-19 cases in their area, a percentage of exposure risk if returned. The cases were supplied by a New York Times repository that listed the active cases in every zip code of the United States. The formula was derived from communciations that our team had with an epidemiologist, but it should be noted it is not an exactly precise percentage. 
 
-# SQL
-
 The formula we used to calculate the exposure rate is as follows:
 
 Exposure Risk = 1 - ( 1 - Previously Active * Transmissibility of Household) ^ (People)
 
 Where the variables are:
-Previously Active = Active Case Count / Population of the County
-Active Case Count = Total Current COVID-19 Case Count in the County
-People = How many people (include your household members) do you come into close contact (> 10 min, < 6 feet) within a week?
-And the constant is:
-Transmissibility of Household = 0.105 (According to the CDC)
 
+    Previously Active = Active Case Count / Population of the County
+
+    Active Case Count = Total Current COVID-19 Case Count in the County
+
+    People = How many people (include your household members) do you come into close contact (> 10 min, < 6 feet) within a week?
+
+And the constant is:
+
+    Transmissibility of Household = 0.105 (According to the CDC)
+    
+# SQL
+
+
+
+In lines 100-103, the stored procedure is being created and it is named ExposureRisk. It has two parameters, an input variable “zipCode” that is an integer and an output variable “risk” that is of type float. These, obviously, relate to the user’s zip code input and the program’s exposure risk percentage as an output.  In lines 104-105, we have our constant for our formulas declared as variables where @trans is the Transmissibility of Household variable and @nppl is the People variable.
+
+Lines 107-113 were created because some counties have the same name as other counties in a different state. So, if the zip code the user enters checks just the county name in the uszips table and uses that county name to get the cases from the us-counties table then it will return multiple rows of data. That is why the two temporary variables tempc and tempst in these lines were created, so that the entered zip code is matching the state and county name in both tables and returning just one row of data. 
+
+Lines 115-117 are to store the population of the county in the variable prevalence. The formula calls for the entire population of the county, so using the two variables above, tempc and tempst, to sum up the total population. We do this by using the sum() function to add up all the rows in the population column of table uszips where the county_name column equals tempc and the state_name column equals tempst. 
+
+For our final variable, Active Case Count, in lines 119-124 we used a select statement to pull the value out of the case column in table us-counties. This was done by matching the county column to tempc and the state column to tempst to get the correct county. Since this repository is updated every couple of days, we needed to pull the latest data available which was done using the max() function with the date column (max(date)). 
+
+After all the data had been assigned to the correct variables we were finally able to insert the formula into the procedure to produce our output variable risk. Lines 126-128 show how the Previously Active variable (prev_active) is assigned and how the formula assigns its result into the risk variable.
+From here, the procedure just needs to be called with the user’s zip code as the parameter and we will be able to obtain the exposure risk for that county. The call goes as follows:
+
+                                       `call ExposureRisk(@zipCode, @risk)`
+
+Where the @zipCode variable is already declared and assigned to the user’s zip code and the @risk variable is the output variable that has not been declared or assigned a value yet. After the stored procedure is executed you can then return the @risk variable to the user. 
 
 
 
