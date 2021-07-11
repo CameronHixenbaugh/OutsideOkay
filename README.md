@@ -20,7 +20,7 @@ And the constant is:
     
 # SQL
 
-
+![Stored Procedure for exposure rate](./StoredProcedure.jpg "Stored Procedure")
 
 In lines 100-103, the stored procedure is being created and it is named ExposureRisk. It has two parameters, an input variable “zipCode” that is an integer and an output variable “risk” that is of type float. These, obviously, relate to the user’s zip code input and the program’s exposure risk percentage as an output.  In lines 104-105, we have our constant for our formulas declared as variables where @trans is the Transmissibility of Household variable and @nppl is the People variable.
 
